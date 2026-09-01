@@ -90,7 +90,7 @@ export default function AppLayout() {
           className="font-display text-2xl"
           style={{ color: "rgba(240,237,232,0.5)" }}
         >
-          Folio
+          Dailys
         </motion.div>
       </div>
     );
@@ -122,11 +122,10 @@ export default function AppLayout() {
         <div className="flex items-center gap-3 px-4 py-5 flex-shrink-0" style={{ borderBottom: "1px solid var(--card-border)" }}>
           <motion.div
             whileHover={{ scale: 1.06 }} whileTap={{ scale: 0.94 }}
-            className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 cursor-pointer"
-            style={{ background: "var(--accent)" }}
+            className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 cursor-pointer overflow-hidden"
             onClick={() => navigate("/dashboard")}
           >
-            <span className="font-display text-sm font-bold" style={{ color: "#0c0c0c" }}>F</span>
+            <img src="/DailysLogo.png" alt="Dailys" className="w-full h-full object-contain" />
           </motion.div>
 
           <AnimatePresence initial={false}>
@@ -137,7 +136,7 @@ export default function AppLayout() {
                 className="font-display text-lg tracking-wide flex-1 whitespace-nowrap overflow-hidden"
                 style={{ color: "var(--foreground)" }}
               >
-                Folio
+                Dailys
               </motion.span>
             )}
           </AnimatePresence>

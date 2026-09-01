@@ -302,13 +302,8 @@ export default function Landing() {
         }}
       >
         <div className="flex items-center gap-2.5">
-          <div
-            className="w-7 h-7 rounded-lg flex items-center justify-center"
-            style={{ background: "rgba(240,237,232,0.1)", border: "1px solid rgba(240,237,232,0.1)" }}
-          >
-            <span className="font-display text-sm font-bold" style={{ color: "var(--foreground)" }}>F</span>
-          </div>
-          <span className="font-display text-xl" style={{ color: "var(--foreground)" }}>Folio</span>
+          <img src="/DailysLogo.png" alt="Dailys" className="w-7 h-7 rounded-lg object-contain" />
+          <span className="font-display text-xl" style={{ color: "var(--foreground)" }}>Dailys</span>
         </div>
 
         <div className="flex items-center gap-3">
@@ -369,7 +364,7 @@ export default function Landing() {
             style={{ height: "clamp(120px, 22vw, 280px)" }}
           >
             <DotMatrixText
-              text={["Think clearly,", "work deeply.", "Stay focused.", "Folio."]}
+              text={["Think clearly,", "work deeply.", "Stay focused.", "Dailys."]}
               transition="fade"
               cycleInterval={2800}
               dotSize={4}
@@ -620,7 +615,7 @@ export default function Landing() {
               className="ml-4 flex-1 max-w-xs rounded-md px-3 py-1 text-xs font-mono-data text-center"
               style={{ background: "rgba(240,237,232,0.05)", color: "var(--muted)" }}
             >
-              app.folio.work/dashboard
+              app.dailys.work/dashboard
             </span>
           </div>
 
@@ -632,10 +627,8 @@ export default function Landing() {
               style={{ width: "160px", borderRight: "1px solid var(--card-border)" }}
             >
               <div className="flex items-center gap-2 px-2 py-2 mb-1">
-                <div className="w-5 h-5 rounded flex items-center justify-center" style={{ background: "rgba(240,237,232,0.1)", border: "1px solid rgba(240,237,232,0.1)" }}>
-                  <span className="font-display text-xs font-bold" style={{ color: "var(--foreground)", fontSize: "9px" }}>F</span>
-                </div>
-                <span className="font-display text-xs" style={{ color: "var(--foreground)" }}>Folio</span>
+                <img src="/DailysLogo.png" alt="Dailys" className="w-5 h-5 rounded object-contain" />
+                <span className="font-display text-xs" style={{ color: "var(--foreground)" }}>Dailys</span>
               </div>
               {["Home", "Tasks", "Notes", "Analytics"].map((item, i) => (
                 <div
@@ -723,13 +716,11 @@ export default function Landing() {
         style={{ borderTop: "1px solid var(--card-border)" }}
       >
         <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded flex items-center justify-center" style={{ background: "rgba(240,237,232,0.08)", border: "1px solid rgba(240,237,232,0.1)" }}>
-            <span className="font-display text-xs font-bold" style={{ color: "var(--foreground)", fontSize: "10px" }}>F</span>
-          </div>
-          <span className="font-display" style={{ color: "var(--muted)" }}>Folio</span>
+          <img src="/DailysLogo.png" alt="Dailys" className="w-6 h-6 rounded object-contain" />
+          <span className="font-display" style={{ color: "var(--muted)" }}>Dailys</span>
         </div>
         <p className="font-mono-data text-xs" style={{ color: "var(--muted)" }}>
-          © 2026 Folio. All rights reserved.
+          © 2026 Dailys. All rights reserved.
         </p>
         <div className="hidden md:flex items-center gap-6">
           {["Privacy", "Terms", "Contact"].map((item) => (

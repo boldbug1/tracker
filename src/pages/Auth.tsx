@@ -119,12 +119,11 @@ export default function Auth() {
           <Link to="/" className="flex items-center justify-center gap-2 mb-10" style={{ textDecoration: "none" }}>
             <motion.div
               whileHover={{ scale: 1.08 }} whileTap={{ scale: 0.92 }}
-              className="w-8 h-8 rounded-lg flex items-center justify-center"
-              style={{ background: "var(--accent)" }}
+              className="w-8 h-8 rounded-lg flex items-center justify-center overflow-hidden"
             >
-              <span className="font-display text-sm font-bold" style={{ color: "#0c0c0c" }}>F</span>
+              <img src="/DailysLogo.png" alt="Dailys" className="w-full h-full object-contain" />
             </motion.div>
-            <span className="font-display text-2xl" style={{ color: "var(--foreground)" }}>Folio</span>
+            <span className="font-display text-2xl" style={{ color: "var(--foreground)" }}>Dailys</span>
           </Link>
         </motion.div>
 
@@ -148,7 +147,7 @@ export default function Auth() {
             className="text-sm mb-7"
             style={{ color: "var(--muted)" }}
           >
-            {isSignup ? "Start your focused workflow today." : "Sign in to continue to Folio."}
+            {isSignup ? "Start your focused workflow today." : "Sign in to continue to Dailys."}
           </motion.p>
 
           {/* OAuth */}
@@ -283,7 +282,7 @@ export default function Auth() {
           </form>
 
           <p className="text-sm text-center mt-6" style={{ color: "var(--muted)" }}>
-            {isSignup ? "Already have an account?" : "New to Folio?"}{" "}
+            {isSignup ? "Already have an account?" : "New to Dailys?"}{" "}
             <Link
               to={isSignup ? "/login" : "/signup"}
               className="hover:opacity-80 transition-opacity"

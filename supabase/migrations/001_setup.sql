@@ -1,5 +1,5 @@
 -- ============================================================
--- Folio — Database Setup
+-- Dailys — Database Setup
 -- Run this once in your Supabase SQL Editor
 -- ============================================================
 
