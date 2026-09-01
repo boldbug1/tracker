@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router";
 import { motion, AnimatePresence } from "framer-motion";
+import { useApp } from "../context/AppContext";
 import BackgroundPixelStars from "../components/BackgroundPixelStars";
 import DotMatrixText from "../components/DotMatrixText";
 
@@ -282,6 +283,11 @@ const STATS = [
 
 export default function Landing() {
   const navigate = useNavigate();
+  const { user, loading } = useApp();
+
+  useEffect(() => {
+    if (!loading && user) navigate("/dashboard", { replace: true });
+  }, [user, loading, navigate]);
 
   return (
     <div style={{ background: "var(--background)", color: "var(--foreground)", minHeight: "100%" }}>

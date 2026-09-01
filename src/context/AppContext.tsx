@@ -56,6 +56,7 @@ interface AppContextType {
   // auth
   login: (email: string, password: string) => Promise<{ error?: string }>;
   signup: (email: string, password: string, name: string) => Promise<{ error?: string; needsVerification?: boolean }>;
+  signInWithOAuth: (provider: "google") => Promise<{ error?: string }>;
   logout: () => Promise<void>;
   // profile
   updateProfile: (updates: { name?: string; bio?: string }) => Promise<{ error?: string }>;
@@ -125,12 +126,37 @@ export function AppProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     checkDbReady().then(setDbReady);
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) {
-        loadUserData(session).catch(() => setLoading(false));
-      } else {
-        setLoading(false);
+    // Handle PKCE OAuth callback: Supabase puts ?code=... in URL.
+    // With detectSessionInUrl:true it auto-exchanges, but with HashRouter the code can land after '#'
+    // so we defensively exchange if we see a code anywhere in href.
+    const handleOAuthCallback = async () => {
+      const href = window.location.href;
+      const hasCode = href.includes("code=");
+      if (hasCode) {
+        const { error } = await supabase.auth.exchangeCodeForSession(href);
+        if (error) {
+          console.error("OAuth code exchange failed:", error.message);
+          // Clean URL even on failure to avoid loop
+          window.history.replaceState({}, "", window.location.origin + "/#/");
+        } else {
+          // Clean code from URL before HashRouter processes it
+          window.history.replaceState({}, "", window.location.origin + "/#/");
+        }
+        // getSession / onAuthStateChange will handle the rest
+        return true;
       }
+      return false;
+    };
+
+    handleOAuthCallback().then((handled) => {
+      if (handled) return; // loadUserData will be triggered by SIGNED_IN event after exchange
+      supabase.auth.getSession().then(({ data: { session } }) => {
+        if (session) {
+          loadUserData(session).catch(() => setLoading(false));
+        } else {
+          setLoading(false);
+        }
+      });
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
@@ -163,6 +189,20 @@ export function AppProvider({ children }: { children: ReactNode }) {
     });
     if (error) return { error: error.message };
     if (data.user && !data.session) return { needsVerification: true };
+    return {};
+  };
+
+  const signInWithOAuth = async (provider: "google"): Promise<{ error?: string }> => {
+    // HashRouter (#) breaks PKCE code detection if code ends up after '#'.
+    // Use origin (no hash) so Supabase puts ?code=... in search where detectSessionInUrl can parse it.
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider,
+      options: {
+        redirectTo: window.location.origin,
+        queryParams: { access_type: "offline", prompt: "consent" },
+      },
+    });
+    if (error) return { error: error.message };
     return {};
   };
 
@@ -317,7 +357,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       addTask, toggleTask, deleteTask,
       addNote, updateNote, deleteNote,
       createLinked, linkTaskToNote,
-      login, signup, logout,
+      login, signup, signInWithOAuth, logout,
       updateProfile, uploadAvatar,
     }}>
       {children}
