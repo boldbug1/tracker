@@ -122,10 +122,10 @@ export default function AppLayout() {
         <div className="flex items-center gap-3 px-4 py-5 flex-shrink-0" style={{ borderBottom: "1px solid var(--card-border)" }}>
           <motion.div
             whileHover={{ scale: 1.06 }} whileTap={{ scale: 0.94 }}
-            className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 cursor-pointer overflow-hidden"
+            className="w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0 cursor-pointer overflow-hidden -ml-1"
             onClick={() => navigate("/dashboard")}
           >
-            <img src="/DailysLogo.png" alt="Dailys" className="w-full h-full object-cover scale-[1.7]" />
+            <img src="/DailysLogo.png" alt="Dailys" className="w-full h-full object-cover scale-[2.4]" />
           </motion.div>
 
           <AnimatePresence initial={false}>
@@ -133,8 +133,8 @@ export default function AppLayout() {
               <motion.span
                 initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -10 }}
                 transition={{ duration: 0.18 }}
-                className="font-display text-lg tracking-wide flex-1 whitespace-nowrap overflow-hidden"
-                style={{ color: "var(--foreground)" }}
+                className="font-display text-3xl tracking-wide flex-1 whitespace-nowrap overflow-hidden"
+                style={{ color: "var(--foreground)", paddingTop: "4px" }}
               >
                 Dailys
               </motion.span>

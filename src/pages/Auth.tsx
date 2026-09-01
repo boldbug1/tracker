@@ -250,14 +250,14 @@ export default function Auth() {
         <motion.div
           initial={{ opacity: 0, y: -16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.32, ease: "easeOut" }}
         >
-          <Link to="/" className="flex items-center justify-center gap-2 mb-10" style={{ textDecoration: "none" }}>
+          <Link to="/" className="flex items-center justify-center gap-3 mb-10" style={{ textDecoration: "none" }}>
             <motion.div
               whileHover={{ scale: 1.08 }} whileTap={{ scale: 0.92 }}
-              className="w-8 h-8 rounded-lg flex items-center justify-center overflow-hidden"
+              className="w-14 h-14 rounded-lg flex items-center justify-center overflow-hidden"
             >
-              <img src="/DailysLogo.png" alt="Dailys" className="w-full h-full object-cover scale-[1.7]" />
+              <img src="/DailysLogo.png" alt="Dailys" className="w-full h-full object-cover scale-[2.4]" />
             </motion.div>
-            <span className="font-display text-2xl" style={{ color: "var(--foreground)" }}>Dailys</span>
+            <span className="font-display text-4xl" style={{ color: "var(--foreground)", paddingTop: "6px" }}>Dailys</span>
           </Link>
         </motion.div>
 
