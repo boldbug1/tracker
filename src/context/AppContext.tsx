@@ -14,6 +14,7 @@ export interface Task {
   category: TaskCategory;
   time?: string;
   createdAt: string;
+  completedAt?: string | null;
   linkedNoteId?: number;
 }
 
@@ -76,6 +77,7 @@ function mapTask(row: Record<string, unknown>): Task {
     category: row.category as TaskCategory,
     time: (row.time as string | null) ?? undefined,
     createdAt: row.created_at as string,
+    completedAt: (row.completed_at as string | null) ?? null,
     linkedNoteId: (row.linked_note_id as number | null) ?? undefined,
   };
 }
@@ -244,7 +246,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     if (!user) return;
     const id = Date.now();
     const now = new Date().toISOString();
-    const newTask: Task = { ...t, id, createdAt: now };
+    const newTask: Task = { ...t, id, createdAt: now, completedAt: t.completed ? now : null };
     setTasks((prev) => [...prev, newTask]);
     supabase.from("tasks").insert({
       id,
@@ -256,16 +258,22 @@ export function AppProvider({ children }: { children: ReactNode }) {
       time: t.time ?? null,
       linked_note_id: t.linkedNoteId ?? null,
       created_at: now,
+      completed_at: t.completed ? now : null,
     }).then(({ error }) => { if (error) console.error("addTask sync:", error.message); });
   };
 
   const toggleTask = (id: number) => {
     let newVal = false;
+    let newCompletedAt: string | null = null;
     setTasks((prev) => prev.map((t) => {
-      if (t.id === id) { newVal = !t.completed; return { ...t, completed: newVal }; }
+      if (t.id === id) {
+        newVal = !t.completed;
+        newCompletedAt = newVal ? new Date().toISOString() : null;
+        return { ...t, completed: newVal, completedAt: newCompletedAt };
+      }
       return t;
     }));
-    supabase.from("tasks").update({ completed: newVal }).eq("id", id)
+    supabase.from("tasks").update({ completed: newVal, completed_at: newCompletedAt }).eq("id", id)
       .then(({ error }) => { if (error) console.error("toggleTask sync:", error.message); });
   };
 
@@ -326,7 +334,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       pinned: false,
       linkedTaskId: taskId,
     };
-    const newTask: Task = { ...taskBase, id: taskId, createdAt: now, linkedNoteId: noteId };
+    const newTask: Task = { ...taskBase, id: taskId, createdAt: now, completedAt: taskBase.completed ? now : null, linkedNoteId: noteId };
     setNotes((prev) => [newNote, ...prev]);
     setTasks((prev) => [...prev, newTask]);
     supabase.from("notes").insert({
@@ -337,7 +345,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     supabase.from("tasks").insert({
       id: taskId, user_id: user.id, text: taskBase.text, completed: taskBase.completed,
       priority: taskBase.priority, category: taskBase.category, time: taskBase.time ?? null,
-      linked_note_id: noteId, created_at: now,
+      linked_note_id: noteId, created_at: now, completed_at: taskBase.completed ? now : null,
     }).then(({ error }) => { if (error) console.error("createLinked task sync:", error.message); });
     return { taskId, noteId };
   };
