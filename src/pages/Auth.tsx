@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router";
 import { motion, AnimatePresence } from "framer-motion";
 import { useApp } from "../context/AppContext";
@@ -7,7 +7,11 @@ export default function Auth() {
   const location = useLocation();
   const isSignup = location.pathname === "/signup";
   const navigate = useNavigate();
-  const { login, signup } = useApp();
+  const { login, signup, signInWithOAuth, user, loading: authLoading } = useApp();
+
+  useEffect(() => {
+    if (!authLoading && user) navigate("/dashboard", { replace: true });
+  }, [user, authLoading, navigate]);
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -146,6 +150,34 @@ export default function Auth() {
           >
             {isSignup ? "Start your focused workflow today." : "Sign in to continue to Folio."}
           </motion.p>
+
+          {/* OAuth */}
+          <motion.button
+            initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.28, duration: 0.22 }}
+            whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.99 }}
+            type="button"
+            onClick={async () => {
+              setError("");
+              const { error: oauthError } = await signInWithOAuth("google");
+              if (oauthError) setError(oauthError);
+            }}
+            className="w-full py-3 rounded-xl font-medium text-sm flex items-center justify-center gap-2.5 transition-all duration-150"
+            style={{ background: "var(--foreground)", color: "#0c0c0c", border: "1px solid var(--foreground)" }}
+          >
+            <svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true">
+              <path fill="#EA4335" d="M24 24.5v8.3H34.1c-.4 2.1-2.1 3.9-4.4 4.9l7.1 5.5c4.1-3.8 6.5-9.4 6.5-16 0-1.5-.1-2.9-.4-4.3H24z" />
+              <path fill="#4285F4" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.1-5.5c-2 1.3-4.5 2.1-8.8 2.1-6.7 0-12.4-4.5-14.4-10.6L2.2 33.5C4.2 42.1 13.5 48 24 48z" />
+              <path fill="#FBBC05" d="M9.6 28.2A14.9 14.9 0 019 24c0-1.5.2-3 .6-4.2L2.2 14.5A23 23 0 000 24c0 3.7.9 7.2 2.2 10.2l7.4-6z" />
+              <path fill="#34A853" d="M24 14c3.6 0 6.8 1.2 9.3 3.2l6.9-6.9C36.2 6.1 30.6 4 24 4 13.5 4 4.2 9.9 2.2 14.5l7.4 5.7C11.6 14.1 17.3 14 24 14z" />
+            </svg>
+            Continue with Google
+          </motion.button>
+
+          <div className="flex items-center gap-3">
+            <div className="flex-1 h-px" style={{ background: "var(--card-border)" }} />
+            <span className="font-mono-data text-xs" style={{ color: "var(--muted)" }}>or</span>
+            <div className="flex-1 h-px" style={{ background: "var(--card-border)" }} />
+          </div>
 
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
             <AnimatePresence initial={false}>
