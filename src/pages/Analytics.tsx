@@ -4,50 +4,18 @@ import {
   ResponsiveContainer, RadialBarChart, RadialBar,
 } from "recharts";
 import { motion } from "framer-motion";
+import { useMemo } from "react";
 import { useApp } from "../context/AppContext";
-
-const THIRTY_DAYS = Array.from({ length: 30 }, (_, i) => {
-  const d = new Date();
-  d.setDate(d.getDate() - 29 + i);
-  const s1 = Math.sin(i * 2.7) * 0.5 + 0.5;
-  const s2 = Math.sin(i * 1.3 + 1) * 0.5 + 0.5;
-  return {
-    date: d.toLocaleDateString("en", { month: "short", day: "numeric" }),
-    completed: Math.round(s1 * 8 + 2),
-    added: Math.round(s2 * 5 + 3),
-    focusHours: Math.round((s1 * 3.5 + 1) * 10) / 10,
-  };
-});
-
-const WEEK_DATA = [
-  { day: "Mon", work: 4, focus: 2, personal: 1, health: 1 },
-  { day: "Tue", work: 3, focus: 3, personal: 2, health: 0 },
-  { day: "Wed", work: 5, focus: 1, personal: 0, health: 2 },
-  { day: "Thu", work: 2, focus: 4, personal: 1, health: 1 },
-  { day: "Fri", work: 4, focus: 2, personal: 3, health: 1 },
-  { day: "Sat", work: 1, focus: 0, personal: 2, health: 2 },
-  { day: "Sun", work: 1, focus: 1, personal: 3, health: 1 },
-];
-
-const TASK_DIST = [
-  { name: "Work", value: 38, color: "#d4a853" },
-  { name: "Deep Focus", value: 28, color: "#b48ee8" },
-  { name: "Personal", value: 20, color: "#7eb8e8" },
-  { name: "Health", value: 14, color: "#6fcf8a" },
-];
-
-const NOTE_DIST = [
-  { name: "Work", value: 32, color: "#d4a853" },
-  { name: "Personal", value: 24, color: "#7eb8e8" },
-  { name: "Ideas", value: 28, color: "#b48ee8" },
-  { name: "Journal", value: 16, color: "#6fcf8a" },
-];
-
-const PRIORITY_DIST = [
-  { name: "High", value: 35, color: "#e07070" },
-  { name: "Medium", value: 45, color: "#d4a853" },
-  { name: "Low", value: 20, color: "rgba(240,237,232,0.3)" },
-];
+import {
+  getThirtyDays,
+  getWeekData,
+  getTaskDistribution,
+  getNoteDistribution,
+  getPriorityDistribution,
+  computeStreak,
+  getHeatmap,
+  getTasksThisWeek,
+} from "../lib/analytics";
 
 const GOALS = [
   { name: "Tasks", value: 68, fill: "#d4a853" },
@@ -89,7 +57,17 @@ function Card({ title, children, className = "", delay = 0 }: { title: string; c
   );
 }
 
-function DonutChart({ data }: { data: typeof TASK_DIST }) {
+function DonutChart({ data }: { name: string; value: number; color: string }[]) {
+  const isEmpty = data.every((d) => d.value === 0);
+  if (isEmpty) {
+    return (
+      <div className="flex flex-col items-center justify-center py-8">
+        <p className="text-xs" style={{ color: "var(--muted)" }}>
+          No data yet
+        </p>
+      </div>
+    );
+  }
   return (
     <div>
       <div style={{ height: "160px" }}>
@@ -120,18 +98,30 @@ function DonutChart({ data }: { data: typeof TASK_DIST }) {
 export default function Analytics() {
   const { tasks, notes } = useApp();
 
+  const thirtyDays = useMemo(() => getThirtyDays(tasks), [tasks]);
+  const weekData = useMemo(() => getWeekData(tasks), [tasks]);
+  const taskDist = useMemo(() => getTaskDistribution(tasks), [tasks]);
+  const noteDist = useMemo(() => getNoteDistribution(notes), [notes]);
+  const priorityDist = useMemo(() => getPriorityDistribution(tasks), [tasks]);
+  const streak = useMemo(() => computeStreak(tasks), [tasks]);
+  const tasksThisWeek = useMemo(() => getTasksThisWeek(tasks), [tasks]);
+  const heatmap = useMemo(() => getHeatmap(tasks), [tasks]);
+
   const totalCompleted = tasks.filter((t) => t.completed).length;
   const total = tasks.length;
   const completionRate = total ? Math.round((totalCompleted / total) * 100) : 0;
-  const avgFocus = Math.round(THIRTY_DAYS.reduce((s, d) => s + d.focusHours, 0) / 30 * 10) / 10;
+  const avgFocus = useMemo(() => {
+    const totalCompletedInPeriod = thirtyDays.reduce((s, d) => s + d.completed, 0);
+    return thirtyDays.length ? Math.round((totalCompletedInPeriod / 30) * 10) / 10 : 0;
+  }, [thirtyDays]);
 
   const statsRow = [
-    { label: "Total Tasks", value: total.toString(), change: "+3 today", up: true },
-    { label: "Completion Rate", value: `${completionRate}%`, change: "+5% vs last week", up: true },
-    { label: "Notes Written", value: notes.length.toString(), change: "+1 today", up: true },
-    { label: "Avg Focus / Day", value: `${avgFocus}h`, change: "−0.3h vs last week", up: false },
-    { label: "Day Streak", value: "7", change: "Personal best", up: true },
-    { label: "Tasks This Week", value: "43", change: "+12% vs last", up: true },
+    { label: "Total Tasks", value: total.toString(), change: total ? `${total} total` : "No tasks yet", up: true },
+    { label: "Completion Rate", value: `${completionRate}%`, change: `${totalCompleted} done`, up: true },
+    { label: "Notes Written", value: notes.length.toString(), change: notes.length ? `${notes.length} total` : "No notes", up: true },
+    { label: "Avg Completed / Day", value: `${avgFocus}`, change: "last 30 days", up: true },
+    { label: "Day Streak", value: streak.toString(), change: streak ? `${streak} day${streak !== 1 ? "s" : ""} in a row` : "Start a task to begin", up: streak > 0 },
+    { label: "Tasks This Week", value: tasksThisWeek.toString(), change: "last 7 days", up: true },
   ];
 
   return (
@@ -169,7 +159,7 @@ export default function Analytics() {
         <Card title="30-Day Productivity — Tasks Completed" className="mb-5" delay={0.36}>
           <div style={{ height: "220px" }}>
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={THIRTY_DAYS} margin={{ top: 5, right: 5, left: -25, bottom: 0 }}>
+              <AreaChart data={thirtyDays} margin={{ top: 5, right: 5, left: -25, bottom: 0 }}>
                 <defs>
                   <linearGradient id="completedGrad" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="0%" stopColor="#d4a853" stopOpacity={0.3} />
@@ -204,7 +194,7 @@ export default function Analytics() {
           <Card title="Tasks by Category — This Week" delay={0.42}>
             <div style={{ height: "200px" }}>
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={WEEK_DATA} margin={{ top: 5, right: 5, left: -25, bottom: 0 }} barSize={10}>
+                <BarChart data={weekData} margin={{ top: 5, right: 5, left: -25, bottom: 0 }} barSize={10}>
                   <CartesianGrid stroke="rgba(240,237,232,0.04)" strokeDasharray="4 4" vertical={false} />
                   <XAxis dataKey="day" tick={TICK} axisLine={false} tickLine={false} />
                   <YAxis tick={TICK} axisLine={false} tickLine={false} />
@@ -250,31 +240,35 @@ export default function Analytics() {
         {/* Three pie charts */}
         <div className="grid grid-cols-3 gap-5 mb-5">
           <Card title="Task Distribution" delay={0.5}>
-            <DonutChart data={TASK_DIST} />
+            <DonutChart data={taskDist} />
           </Card>
           <Card title="Priority Breakdown" delay={0.54}>
-            <DonutChart data={PRIORITY_DIST} />
+            <DonutChart data={priorityDist} />
           </Card>
           <Card title="Notes by Category" delay={0.58}>
-            <DonutChart data={NOTE_DIST} />
+            <DonutChart data={noteDist} />
           </Card>
         </div>
 
-        {/* Focus time */}
-        <Card title="Daily Focus Time (Hours) — 30 Days" className="mb-5" delay={0.62}>
+        {/* Focus time — left for now (repurposed to real completed/day) */}
+        <Card title="Daily Tasks Completed — 30 Days" className="mb-5" delay={0.62}>
           <div style={{ height: "180px" }}>
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={THIRTY_DAYS} margin={{ top: 5, right: 5, left: -25, bottom: 0 }}>
+              <LineChart data={thirtyDays} margin={{ top: 5, right: 5, left: -25, bottom: 0 }}>
                 <CartesianGrid stroke="rgba(240,237,232,0.04)" strokeDasharray="4 4" vertical={false} />
                 <XAxis dataKey="date" tick={TICK} axisLine={false} tickLine={false} interval={4} />
-                <YAxis tick={TICK} axisLine={false} tickLine={false} domain={[0, 6]} />
-                <Tooltip {...TT} cursor={{ stroke: "rgba(240,237,232,0.08)" }} formatter={(v) => [`${v}h`, "Focus"]} />
-                <Line type="monotone" dataKey="focusHours" stroke="#b48ee8" strokeWidth={2} dot={false} activeDot={{ r: 4, fill: "#b48ee8", stroke: "#0c0c0c", strokeWidth: 2 }} />
+                <YAxis tick={TICK} axisLine={false} tickLine={false} allowDecimals={false} />
+                <Tooltip {...TT} cursor={{ stroke: "rgba(240,237,232,0.08)" }} formatter={(v) => [`${v}`, "Completed"]} />
+                <Line type="monotone" dataKey="completed" name="Completed" stroke="#b48ee8" strokeWidth={2} dot={false} activeDot={{ r: 4, fill: "#b48ee8", stroke: "#0c0c0c", strokeWidth: 2 }} />
               </LineChart>
             </ResponsiveContainer>
           </div>
           <div className="flex items-center gap-6 mt-3">
-            {[{ label: "Average", value: `${avgFocus}h`, color: "#b48ee8" }, { label: "Best day", value: "4.5h", color: "var(--green)" }, { label: "This week", value: "28.4h", color: "var(--accent)" }].map((s) => (
+            {[
+              { label: "Average", value: `${avgFocus}`, color: "#b48ee8" },
+              { label: "Best day", value: `${Math.max(...thirtyDays.map((d) => d.completed), 0)}`, color: "var(--green)" },
+              { label: "This week", value: `${thirtyDays.slice(-7).reduce((s, d) => s + d.completed, 0)}`, color: "var(--accent)" },
+            ].map((s) => (
               <div key={s.label}>
                 <p className="font-mono-data text-xs" style={{ color: "var(--muted)" }}>{s.label}</p>
                 <p className="font-display text-lg" style={{ color: s.color }}>{s.value}</p>
@@ -283,15 +277,13 @@ export default function Analytics() {
           </div>
         </Card>
 
-        {/* Activity heatmap */}
+        {/* Activity heatmap — now real */}
         <Card title="Activity Heatmap — Last 12 Weeks" delay={0.66}>
           <div className="overflow-x-auto">
             <div className="flex gap-1" style={{ minWidth: "fit-content" }}>
               {Array.from({ length: 12 }, (_, week) => (
                 <div key={week} className="flex flex-col gap-1">
-                  {Array.from({ length: 7 }, (_, day) => {
-                    const seed = Math.sin((week * 7 + day) * 1.7 + 2) * 0.5 + 0.5;
-                    const lvl = seed > 0.7 ? 4 : seed > 0.5 ? 3 : seed > 0.3 ? 2 : seed > 0.1 ? 1 : 0;
+                  {heatmap.slice(week * 7, week * 7 + 7).map((cell, day) => {
                     const ops = [0.05, 0.2, 0.4, 0.65, 1];
                     return (
                       <motion.div
@@ -300,8 +292,8 @@ export default function Analytics() {
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ delay: 0.66 + (week * 7 + day) * 0.003, duration: 0.15 }}
                         className="w-3.5 h-3.5 rounded-sm"
-                        title={`Week ${week + 1}: ${lvl * 2} tasks`}
-                        style={{ background: lvl === 0 ? "rgba(240,237,232,0.05)" : `rgba(212,168,83,${ops[lvl]})` }}
+                        title={`${cell.date}: ${cell.count} task${cell.count !== 1 ? "s" : ""}`}
+                        style={{ background: cell.level === 0 ? "rgba(240,237,232,0.05)" : `rgba(212,168,83,${ops[cell.level]})` }}
                       />
                     );
                   })}

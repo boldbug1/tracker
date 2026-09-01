@@ -1,21 +1,12 @@
-import { useState } from "react";
+import { useMemo } from "react";
 import { Link } from "react-router";
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 import { motion } from "framer-motion";
 import { useApp } from "../context/AppContext";
+import { getMiniChartData, computeStreak, getTasksThisWeek } from "../lib/analytics";
 
 const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-
-const MINI_CHART_DATA = [
-  { day: "Mon", tasks: 6 },
-  { day: "Tue", tasks: 8 },
-  { day: "Wed", tasks: 5 },
-  { day: "Thu", tasks: 9 },
-  { day: "Fri", tasks: 7 },
-  { day: "Sat", tasks: 3 },
-  { day: "Sun", tasks: 5 },
-];
 
 const CAT_COLORS: Record<string, string> = {
   work: "#d4a853",
@@ -55,6 +46,22 @@ export default function Home() {
   const high = tasks.filter((t) => t.priority === "high" && !t.completed).length;
   const recentNotes = notes.slice(0, 3);
   const upcomingTasks = tasks.filter((t) => !t.completed).slice(0, 4);
+  const miniData = useMemo(() => getMiniChartData(tasks), [tasks]);
+  const streak = useMemo(() => computeStreak(tasks), [tasks]);
+  const weeklyTotal = useMemo(() => miniData.reduce((s, d) => s + d.tasks, 0), [miniData]);
+  const prevWeekTotal = useMemo(() => {
+    const weekAgo = new Date();
+    weekAgo.setDate(weekAgo.getDate() - 7);
+    const prevTasks = tasks.filter((t) => {
+      const k = new Date(t.createdAt).toISOString().slice(0, 10);
+      const start = new Date();
+      start.setDate(start.getDate() - 13);
+      const mid = new Date();
+      mid.setDate(mid.getDate() - 6);
+      return k >= start.toISOString().slice(0, 10) && k < mid.toISOString().slice(0, 10);
+    });
+    return prevTasks.length;
+  }, [tasks]);
 
   return (
     <div className="h-full overflow-y-auto">
@@ -95,7 +102,7 @@ export default function Home() {
             { label: "Completed", value: `${completed}/${total}`, sub: `${pct}% done`, color: "var(--green)" },
             { label: "High Priority", value: high.toString(), sub: "open items", color: "#e07070" },
             { label: "Notes", value: notes.length.toString(), sub: "total notes", color: "var(--accent)" },
-            { label: "Day Streak", value: "7", sub: "days in a row", color: "#b48ee8" },
+            { label: "Day Streak", value: streak.toString(), sub: streak ? `${streak} day${streak !== 1 ? "s" : ""} in a row` : "no streak yet", color: "#b48ee8" },
           ].map((s, i) => (
             <motion.div
               key={s.label}
@@ -133,19 +140,19 @@ export default function Home() {
                   <p className="font-mono-data text-xs tracking-widest uppercase" style={{ color: "var(--muted)" }}>
                     Weekly Output
                   </p>
-                  <p className="font-display text-2xl mt-0.5" style={{ color: "var(--foreground)" }}>48 tasks</p>
+                  <p className="font-display text-2xl mt-0.5" style={{ color: "var(--foreground)" }}>{weeklyTotal} tasks</p>
                 </div>
                 <span
                   className="font-mono-data text-xs px-2 py-1 rounded-md"
                   style={{ background: "var(--green-dim)", color: "var(--green)", border: "1px solid rgba(111,207,138,0.2)" }}
                 >
-                  +12% vs last week
+                  {prevWeekTotal === 0 ? (weeklyTotal > 0 ? `+${weeklyTotal} vs last week` : "no change") : `${weeklyTotal >= prevWeekTotal ? "+" : ""}${Math.round(((weeklyTotal - prevWeekTotal) / prevWeekTotal) * 100)}% vs last week`}
                 </span>
               </div>
 
               <div style={{ height: "140px" }}>
                 <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={MINI_CHART_DATA} margin={{ top: 5, right: 5, left: -30, bottom: 0 }}>
+                  <AreaChart data={miniData} margin={{ top: 5, right: 5, left: -30, bottom: 0 }}>
                     <defs>
                       <linearGradient id="taskGradient" x1="0" y1="0" x2="0" y2="1">
                         <stop offset="0%" stopColor="#d4a853" stopOpacity={0.25} />
