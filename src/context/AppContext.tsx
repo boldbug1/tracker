@@ -58,6 +58,8 @@ interface AppContextType {
   login: (email: string, password: string) => Promise<{ error?: string }>;
   signup: (email: string, password: string, name: string) => Promise<{ error?: string; needsVerification?: boolean }>;
   signInWithOAuth: (provider: "google") => Promise<{ error?: string }>;
+  verifyOtp: (email: string, token: string) => Promise<{ error?: string }>;
+  resendOtp: (email: string) => Promise<{ error?: string }>;
   logout: () => Promise<void>;
   // profile
   updateProfile: (updates: { name?: string; bio?: string }) => Promise<{ error?: string }>;
@@ -189,8 +191,21 @@ export function AppProvider({ children }: { children: ReactNode }) {
       password,
       options: { data: { name } },
     });
-    if (error) return { error: error.message };
-    if (data.user && !data.session) return { needsVerification: true };
+    if (error) {
+      const msg = error.message.toLowerCase();
+      if (msg.includes("already registered") || msg.includes("already exists") || msg.includes("user already"))
+        return { error: "An account with this email already exists. Try Continue with Google or Sign in." };
+      return { error: error.message };
+    }
+    // Supabase with Confirm email ON returns fake success (identities=[]) for enumeration protection.
+    // Detect duplicate: user created but no identities and no session.
+    if (data.user && !data.session) {
+      const identities = (data.user as unknown as { identities?: unknown[] })?.identities;
+      if (Array.isArray(identities) && identities.length === 0) {
+        return { error: "An account with this email already exists. Try Continue with Google or Sign in." };
+      }
+      return { needsVerification: true };
+    }
     return {};
   };
 
@@ -204,6 +219,19 @@ export function AppProvider({ children }: { children: ReactNode }) {
         queryParams: { access_type: "offline", prompt: "consent" },
       },
     });
+    if (error) return { error: error.message };
+    return {};
+  };
+
+  const verifyOtp = async (email: string, token: string): Promise<{ error?: string }> => {
+    if (token.length !== 8) return { error: "Enter 8-digit code" };
+    const { error } = await supabase.auth.verifyOtp({ email, token, type: "signup" });
+    if (error) return { error: error.message };
+    return {};
+  };
+
+  const resendOtp = async (email: string): Promise<{ error?: string }> => {
+    const { error } = await supabase.auth.resend({ type: "signup", email });
     if (error) return { error: error.message };
     return {};
   };
@@ -365,7 +393,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       addTask, toggleTask, deleteTask,
       addNote, updateNote, deleteNote,
       createLinked, linkTaskToNote,
-      login, signup, signInWithOAuth, logout,
+      login, signup, signInWithOAuth, verifyOtp, resendOtp, logout,
       updateProfile, uploadAvatar,
     }}>
       {children}

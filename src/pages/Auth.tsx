@@ -1,13 +1,14 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate, useLocation } from "react-router";
 import { motion, AnimatePresence } from "framer-motion";
 import { useApp } from "../context/AppContext";
+import { getStrength, validatePassword, requirements } from "../lib/passwordStrength";
 
 export default function Auth() {
   const location = useLocation();
   const isSignup = location.pathname === "/signup";
   const navigate = useNavigate();
-  const { login, signup, signInWithOAuth, user, loading: authLoading } = useApp();
+  const { login, signup, signInWithOAuth, verifyOtp, resendOtp, user, loading: authLoading } = useApp();
 
   useEffect(() => {
     if (!authLoading && user) navigate("/dashboard", { replace: true });
@@ -16,13 +17,89 @@ export default function Auth() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPw, setShowPw] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [needsVerification, setNeedsVerification] = useState(false);
 
+  // OTP state
+  const [otp, setOtp] = useState("");
+  const [otpLoading, setOtpLoading] = useState(false);
+  const [otpError, setOtpError] = useState("");
+  const [cooldown, setCooldown] = useState(30);
+  const [resending, setResending] = useState(false);
+  const cooldownRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  useEffect(() => {
+    if (!needsVerification) return;
+    setCooldown(30);
+    if (cooldownRef.current) clearInterval(cooldownRef.current);
+    cooldownRef.current = setInterval(() => {
+      setCooldown((c) => {
+        if (c <= 1) {
+          if (cooldownRef.current) clearInterval(cooldownRef.current);
+          return 0;
+        }
+        return c - 1;
+      });
+    }, 1000);
+    return () => {
+      if (cooldownRef.current) clearInterval(cooldownRef.current);
+    };
+  }, [needsVerification]);
+
+  const handleResend = async () => {
+    if (cooldown > 0 || resending) return;
+    setResending(true);
+    setOtpError("");
+    const { error: err } = await resendOtp(email);
+    setResending(false);
+    if (err) {
+      setOtpError(err);
+      return;
+    }
+    setCooldown(30);
+    if (cooldownRef.current) clearInterval(cooldownRef.current);
+    cooldownRef.current = setInterval(() => {
+      setCooldown((c) => {
+        if (c <= 1) {
+          if (cooldownRef.current) clearInterval(cooldownRef.current);
+          return 0;
+        }
+        return c - 1;
+      });
+    }, 1000);
+  };
+
+  const handleVerify = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (otp.length !== 8) {
+      setOtpError("Enter 8-digit code");
+      return;
+    }
+    setOtpLoading(true);
+    setOtpError("");
+    const { error: err } = await verifyOtp(email, otp);
+    setOtpLoading(false);
+    if (err) {
+      setOtpError(err);
+      return;
+    }
+    navigate("/dashboard");
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+
+    if (isSignup) {
+      const pwErr = validatePassword(password);
+      if (pwErr) {
+        setError(pwErr);
+        return;
+      }
+    }
+
     setLoading(true);
 
     if (isSignup) {
@@ -77,25 +154,82 @@ export default function Auth() {
               <path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
             </svg>
           </div>
-          <h2 className="font-display text-2xl mb-2" style={{ color: "var(--foreground)" }}>Check your inbox</h2>
-          <p className="text-sm leading-relaxed mb-6" style={{ color: "var(--muted)" }}>
-            We sent a verification link to <strong style={{ color: "var(--foreground)" }}>{email}</strong>.
-            Click it to activate your account.
+          <h2 className="font-display text-2xl mb-2" style={{ color: "var(--foreground)" }}>Verify your email</h2>
+          <p className="text-sm leading-relaxed mb-2" style={{ color: "var(--muted)" }}>
+            We sent an 8-digit code to <strong style={{ color: "var(--foreground)" }}>{email}</strong>.
           </p>
-          <p className="text-xs" style={{ color: "var(--muted)" }}>
-            To skip email verification, go to your Supabase dashboard → Auth → Email Auth → disable "Confirm email".
+          <p className="text-xs mb-6" style={{ color: "var(--muted)" }}>
+            Enter it below or click the link in the email.
           </p>
-          <button
-            onClick={() => setNeedsVerification(false)}
-            className="mt-6 text-sm hover:opacity-80 transition-opacity"
-            style={{ color: "var(--muted)", textDecoration: "underline", background: "none", border: "none", cursor: "pointer" }}
-          >
-            Back to sign in
-          </button>
+
+          <form onSubmit={handleVerify} className="flex flex-col gap-3">
+            <input
+              value={otp}
+              onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 8))}
+              placeholder="12345678"
+              inputMode="numeric"
+              autoComplete="one-time-code"
+              maxLength={8}
+              className="w-full px-4 py-3 rounded-xl text-center text-lg tracking-[0.3em] outline-none transition-all duration-150"
+              style={{ background: "rgba(240,237,232,0.05)", border: "1px solid var(--card-border)", color: "var(--foreground)", letterSpacing: "0.3em" }}
+              onFocus={(e) => (e.target.style.borderColor = "rgba(240,237,232,0.25)")}
+              onBlur={(e) => (e.target.style.borderColor = "var(--card-border)")}
+            />
+            <AnimatePresence>
+              {otpError && (
+                <motion.div
+                  initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }}
+                  className="text-xs px-3 py-2 rounded-lg"
+                  style={{ background: "rgba(255,80,80,0.08)", color: "rgba(255,100,100,0.9)", border: "1px solid rgba(255,80,80,0.15)" }}
+                >
+                  {otpError}
+                </motion.div>
+              )}
+            </AnimatePresence>
+            <motion.button
+              whileHover={{ scale: otpLoading ? 1 : 1.02 }} whileTap={{ scale: otpLoading ? 1 : 0.98 }}
+              type="submit"
+              disabled={otpLoading}
+              className="w-full py-3 rounded-xl font-medium text-sm flex items-center justify-center gap-2"
+              style={{ background: "var(--foreground)", color: "#0c0c0c", opacity: otpLoading ? 0.7 : 1 }}
+            >
+              {otpLoading && <span className="w-3 h-3 border-2 border-black/30 border-t-black rounded-full animate-spin" />}
+              {otpLoading ? "Verifying…" : "Verify code"}
+            </motion.button>
+          </form>
+
+          <div className="mt-4 flex flex-col gap-2">
+            <button
+              onClick={handleResend}
+              disabled={cooldown > 0 || resending}
+              className="text-sm py-2 rounded-xl transition-all"
+              style={{
+                background: cooldown > 0 ? "transparent" : "rgba(240,237,232,0.06)",
+                color: cooldown > 0 ? "var(--muted)" : "var(--foreground)",
+                border: "1px solid var(--card-border)",
+                opacity: cooldown > 0 || resending ? 0.6 : 1,
+                cursor: cooldown > 0 || resending ? "not-allowed" : "pointer",
+              }}
+            >
+              {resending ? "Sending…" : cooldown > 0 ? `Resend in ${cooldown}s` : "Resend code"}
+            </button>
+            <button
+              onClick={() => setNeedsVerification(false)}
+              className="text-sm hover:opacity-80 transition-opacity"
+              style={{ color: "var(--muted)", textDecoration: "underline", background: "none", border: "none", cursor: "pointer" }}
+            >
+              Back to sign in
+            </button>
+          </div>
+          <p className="text-xs mt-4" style={{ color: "rgba(240,237,232,0.25)" }}>
+            Didn’t get it? Check spam or resend after cooldown.
+          </p>
         </motion.div>
       </div>
     );
   }
+
+  const strength = getStrength(password);
 
   return (
     <div
@@ -172,7 +306,7 @@ export default function Auth() {
             Continue with Google
           </motion.button>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 my-4">
             <div className="flex-1 h-px" style={{ background: "var(--card-border)" }} />
             <span className="font-mono-data text-xs" style={{ color: "var(--muted)" }}>or</span>
             <div className="flex-1 h-px" style={{ background: "var(--card-border)" }} />
@@ -226,18 +360,64 @@ export default function Auth() {
               <label className="font-mono-data text-xs tracking-widest uppercase block mb-1.5" style={{ color: "var(--muted)" }}>
                 Password
               </label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                required
-                minLength={6}
-                className="w-full px-4 py-3 rounded-xl text-sm outline-none transition-all duration-150"
-                style={{ background: "rgba(240,237,232,0.05)", border: "1px solid var(--card-border)", color: "var(--foreground)" }}
-                onFocus={(e) => (e.target.style.borderColor = "rgba(240,237,232,0.25)")}
-                onBlur={(e) => (e.target.style.borderColor = "var(--card-border)")}
-              />
+              <div className="relative">
+                <input
+                  type={showPw ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  required
+                  minLength={8}
+                  className="w-full px-4 py-3 pr-10 rounded-xl text-sm outline-none transition-all duration-150"
+                  style={{ background: "rgba(240,237,232,0.05)", border: "1px solid var(--card-border)", color: "var(--foreground)" }}
+                  onFocus={(e) => (e.target.style.borderColor = "rgba(240,237,232,0.25)")}
+                  onBlur={(e) => (e.target.style.borderColor = "var(--card-border)")}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPw((v) => !v)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-xs"
+                  style={{ color: "var(--muted)", background: "none", border: "none", cursor: "pointer" }}
+                >
+                  {showPw ? "Hide" : "Show"}
+                </button>
+              </div>
+
+              {isSignup && password.length > 0 && (
+                <div className="mt-2">
+                  <div className="flex gap-1 mb-1.5">
+                    {Array.from({ length: 4 }).map((_, i) => (
+                      <div
+                        key={i}
+                        className="h-1 flex-1 rounded-full transition-colors duration-200"
+                        style={{ background: i < strength.score ? strength.color : "rgba(240,237,232,0.08)" }}
+                      />
+                    ))}
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="font-mono-data text-xs" style={{ color: strength.color }}>{strength.label}</span>
+                    <span className="font-mono-data text-xs" style={{ color: "var(--muted)" }}>{password.length}/8 min</span>
+                  </div>
+                  <div className="flex flex-wrap gap-1.5 mt-2">
+                    {requirements.map((r) => {
+                      const ok = r.test(password);
+                      return (
+                        <span
+                          key={r.label}
+                          className="font-mono-data text-xs px-2 py-0.5 rounded-full transition-colors"
+                          style={{
+                            background: ok ? "rgba(111,207,138,0.12)" : "rgba(240,237,232,0.06)",
+                            color: ok ? "var(--green)" : "var(--muted)",
+                            border: `1px solid ${ok ? "rgba(111,207,138,0.25)" : "var(--card-border)"}`,
+                          }}
+                        >
+                          {ok ? "✓ " : ""}{r.label}
+                        </span>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
             </div>
 
             {!isSignup && (
