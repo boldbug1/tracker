@@ -125,7 +125,7 @@ export default function AppLayout() {
             className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 cursor-pointer overflow-hidden"
             onClick={() => navigate("/dashboard")}
           >
-            <img src="/DailysLogo.png" alt="Dailys" className="w-full h-full object-contain" />
+            <img src="/DailysLogo.png" alt="Dailys" className="w-full h-full object-cover scale-[1.7]" />
           </motion.div>
 
           <AnimatePresence initial={false}>

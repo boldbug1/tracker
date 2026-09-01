@@ -302,7 +302,9 @@ export default function Landing() {
         }}
       >
         <div className="flex items-center gap-2.5">
-          <img src="/DailysLogo.png" alt="Dailys" className="w-7 h-7 rounded-lg object-contain" />
+          <div className="w-8 h-8 rounded-lg overflow-hidden flex items-center justify-center">
+            <img src="/DailysLogo.png" alt="Dailys" className="w-full h-full object-cover scale-[1.7]" />
+          </div>
           <span className="font-display text-xl" style={{ color: "var(--foreground)" }}>Dailys</span>
         </div>
 
@@ -627,7 +629,9 @@ export default function Landing() {
               style={{ width: "160px", borderRight: "1px solid var(--card-border)" }}
             >
               <div className="flex items-center gap-2 px-2 py-2 mb-1">
-                <img src="/DailysLogo.png" alt="Dailys" className="w-5 h-5 rounded object-contain" />
+                <div className="w-5 h-5 rounded overflow-hidden flex items-center justify-center">
+                  <img src="/DailysLogo.png" alt="Dailys" className="w-full h-full object-cover scale-[1.7]" />
+                </div>
                 <span className="font-display text-xs" style={{ color: "var(--foreground)" }}>Dailys</span>
               </div>
               {["Home", "Tasks", "Notes", "Analytics"].map((item, i) => (
@@ -716,7 +720,9 @@ export default function Landing() {
         style={{ borderTop: "1px solid var(--card-border)" }}
       >
         <div className="flex items-center gap-2">
-          <img src="/DailysLogo.png" alt="Dailys" className="w-6 h-6 rounded object-contain" />
+          <div className="w-6 h-6 rounded overflow-hidden flex items-center justify-center">
+            <img src="/DailysLogo.png" alt="Dailys" className="w-full h-full object-cover scale-[1.7]" />
+          </div>
           <span className="font-display" style={{ color: "var(--muted)" }}>Dailys</span>
         </div>
         <p className="font-mono-data text-xs" style={{ color: "var(--muted)" }}>

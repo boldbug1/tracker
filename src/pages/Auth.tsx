@@ -121,7 +121,7 @@ export default function Auth() {
               whileHover={{ scale: 1.08 }} whileTap={{ scale: 0.92 }}
               className="w-8 h-8 rounded-lg flex items-center justify-center overflow-hidden"
             >
-              <img src="/DailysLogo.png" alt="Dailys" className="w-full h-full object-contain" />
+              <img src="/DailysLogo.png" alt="Dailys" className="w-full h-full object-cover scale-[1.7]" />
             </motion.div>
             <span className="font-display text-2xl" style={{ color: "var(--foreground)" }}>Dailys</span>
           </Link>
