@@ -1,0 +1,10 @@
+{
+  "description": "Effortlessly manage your daily tasks with a sleek, minimalist dashboard that enhances productivity and keeps you organized.",
+  "robots": {
+    "index": false
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}
