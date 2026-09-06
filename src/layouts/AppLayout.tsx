@@ -174,14 +174,14 @@ export default function AppLayout() {
         style={{ background: "var(--card)", borderRight: "1px solid var(--card-border)" }}
       >
         {/* Logo */}
-        <div className="flex items-center gap-3 px-4 py-5 flex-shrink-0" style={{ borderBottom: "1px solid var(--card-border)" }}>
+        <div className={`flex items-center py-5 flex-shrink-0 transition-all duration-300 ${collapsed ? "px-2" : "px-4 gap-3"}`} style={{ borderBottom: "1px solid var(--card-border)" }}>
           <motion.div 
             whileHover={{ scale: 1.05 }} 
             whileTap={{ scale: 0.95 }}
-            className="h-10 rounded-lg flex items-center justify-center flex-shrink-0 cursor-pointer -ml-1"
+            className={`h-10 rounded-lg flex items-center justify-start flex-shrink-0 cursor-pointer overflow-hidden transition-all duration-300 ${collapsed ? "w-[28px] ml-1" : "w-[120px] -ml-1"}`}
             onClick={() => navigate("/dashboard")}
           >
-            <img src="/dailyss-logo.png" alt="Dailys" className="h-full w-auto object-contain" />
+            <img src="/dailyss-logo.png" alt="Dailys" className="h-full w-auto object-cover object-left max-w-none" />
           </motion.div>
 
 
