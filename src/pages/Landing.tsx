@@ -117,43 +117,54 @@ function NotesDemo() {
 
 function GraphDemo() {
   const nodes = [
-    { x: 50, y: 48, r: 9, c: "#d4a853" },
-    { x: 76, y: 28, r: 5, c: "#9b8cc4" },
-    { x: 24, y: 30, r: 5, c: "#9b8cc4" },
-    { x: 64, y: 68, r: 5, c: "#9b8cc4" },
-    { x: 32, y: 64, r: 5, c: "#b48ee8" },
-    { x: 82, y: 60, r: 4, c: "#d4a853" },
-    { x: 14, y: 58, r: 4, c: "#7eb8e8" },
-    { x: 68, y: 18, r: 4, c: "#6fcf8a" },
-    { x: 42, y: 82, r: 4, c: "#d4a853" },
+    { x: 50, y: 48, r: 6, c: "#d4a853", label: "workspace.md" },
+    { x: 76, y: 32, r: 4, c: "#b48ee8", label: "note.md" },
+    { x: 26, y: 38, r: 4, c: "#7eb8e8", label: "task.md" },
+    { x: 66, y: 68, r: 4, c: "#6fcf8a", label: "focus.md" },
+    { x: 34, y: 64, r: 4, c: "#d4a853", label: "idea.md" },
+    { x: 50, y: 22, r: 4, c: "#e07070", label: "project.md" },
   ];
-  const links = [[0, 1], [0, 2], [0, 3], [0, 4], [3, 5], [4, 6], [1, 7], [3, 8]];
+  const links = [[0, 1], [0, 2], [0, 3], [0, 4], [0, 5], [1, 5], [2, 4], [1, 3]];
   const [hov, setHov] = useState<number | null>(null);
 
   return (
-    <svg viewBox="0 0 100 100" width="100%" height="100%">
+    <svg viewBox="0 0 100 100" width="100%" height="100%" style={{ overflow: 'visible' }}>
       {links.map(([a, b], i) => {
         const s = nodes[a]!, t = nodes[b]!;
         const lit = hov === a || hov === b;
         return (
-          <line key={i} x1={s.x} y1={s.y} x2={t.x} y2={t.y}
+          <line key={`l-${i}`} x1={s.x} y1={s.y} x2={t.x} y2={t.y}
             stroke={lit ? "rgba(212,168,83,0.55)" : "color-mix(in srgb, var(--foreground) 9%, transparent)"}
             strokeWidth={lit ? 0.8 : 0.4}
             style={{ transition: "all 0.2s" }}
           />
         );
       })}
-      {nodes.map((n, i) => (
-        <g key={i} style={{ cursor: "pointer" }}
-          onMouseEnter={() => setHov(i)} onMouseLeave={() => setHov(null)}
-        >
-          {hov === i && <circle cx={n.x} cy={n.y} r={n.r + 5} fill={n.c} opacity={0.1} />}
-          <motion.circle cx={n.x} cy={n.y} r={n.r} fill={n.c}
-            animate={{ opacity: hov == null ? 0.72 : hov === i ? 1 : 0.22, r: hov === i ? n.r * 1.35 : n.r }}
-            transition={{ duration: 0.2 }}
-          />
-        </g>
-      ))}
+      {nodes.map((n, i) => {
+        const isCenter = i === 0;
+        return (
+          <g key={`n-${i}`} style={{ cursor: "pointer" }}
+            onMouseEnter={() => setHov(i)} onMouseLeave={() => setHov(null)}
+          >
+            {hov === i && <circle cx={n.x} cy={n.y} r={n.r + 5} fill={n.c} opacity={0.15} />}
+            <motion.circle cx={n.x} cy={n.y} r={isCenter ? n.r + 1 : n.r} fill={n.c}
+              animate={{ opacity: hov == null ? 0.8 : hov === i ? 1 : 0.25, r: hov === i ? (n.r * 1.2) : (isCenter ? n.r + 1 : n.r) }}
+              transition={{ duration: 0.2 }}
+            />
+            <motion.text
+              x={n.x} y={n.y + (isCenter ? 12 : 9)}
+              textAnchor="middle"
+              fontSize={3.5}
+              fontFamily="JetBrains Mono, monospace"
+              fill={hov === i ? "var(--foreground)" : "var(--muted)"}
+              animate={{ opacity: hov == null ? 0.7 : hov === i ? 1 : 0.2 }}
+              style={{ pointerEvents: 'none', transition: 'fill 0.2s' }}
+            >
+              {n.label}
+            </motion.text>
+          </g>
+        );
+      })}
     </svg>
   );
 }
@@ -520,7 +531,7 @@ export default function Landing() {
               viewport={{ once: true }} transition={{ delay: 0.14, duration: 0.38 }}
               whileHover={{ scale: 1.015, boxShadow: "0 20px 48px color-mix(in srgb, var(--background) 40%, transparent)", transition: { duration: 0.22 } }}
             >
-              <div className="flex-1">
+              <div className="relative w-full h-[220px] md:h-[260px] overflow-hidden flex items-center justify-center -mt-2 mb-2">
                 <GraphDemo />
               </div>
               <div
