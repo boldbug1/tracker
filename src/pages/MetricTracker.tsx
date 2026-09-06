@@ -83,6 +83,8 @@ export default function MetricTracker() {
   const notifiedRefs = useRef<Set<string>>(new Set());
   useEffect(() => {
     if (!preferences.reminders_enabled) return;
+    if (!('Notification' in window)) return;
+    
     if (Notification.permission !== "granted" && Notification.permission !== "denied") {
       Notification.requestPermission();
     }
@@ -105,7 +107,7 @@ export default function MetricTracker() {
         }
       });
     }
-  }, [leads, preferences]);
+  }, [leads, preferences.reminders_enabled, preferences.overdue_reminders_enabled]);
 
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<LeadStatus | "ALL">("ALL");

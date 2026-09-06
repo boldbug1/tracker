@@ -1,5 +1,8 @@
-import { createHashRouter } from "react-router";
+import { createHashRouter, Navigate } from "react-router";
 import Landing from "../pages/Landing";
+import HelpPage from "../pages/Help";
+import PrivacyPage from "../pages/Privacy";
+import FaqPage from "../pages/Faq";
 import Auth from "../pages/Auth";
 import AppLayout from "../layouts/AppLayout";
 import Home from "../pages/Home";
@@ -13,6 +16,9 @@ import Settings from "../pages/Settings";
 
 export const router = createHashRouter([
   { path: "/", Component: Landing },
+  { path: "/help", Component: HelpPage },
+  { path: "/privacy", Component: PrivacyPage },
+  { path: "/faq", Component: FaqPage },
   { path: "/login", Component: Auth },
   { path: "/signup", Component: Auth },
   {

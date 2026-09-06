@@ -2,6 +2,7 @@ import { useState, useMemo } from "react";
 import { useNavigate } from "react-router";
 import { motion, AnimatePresence } from "framer-motion";
 import { useApp, type Priority, type TaskCategory } from "../context/AppContext";
+import { useFocus } from "../context/FocusContext";
 
 const CAT_COLORS: Record<TaskCategory, string> = {
   work: "#d4a853",
@@ -269,6 +270,7 @@ function NewItemModal({ onClose }: { onClose: () => void }) {
 
 export default function Todos() {
   const { tasks, toggleTask, deleteTask, notes } = useApp();
+  const { openSetup } = useFocus();
   const navigate = useNavigate();
 
   const [activeFilter, setActiveFilter] = useState<"all" | TaskCategory>("all");
@@ -520,16 +522,31 @@ export default function Todos() {
                       {CAT_LABELS[task.category]}
                     </span>
 
-                    <motion.button
-                      whileHover={{ scale: 1.2 }} whileTap={{ scale: 0.8 }}
-                      onClick={() => deleteTask(task.id)}
-                      className="md:opacity-0 group-hover:opacity-100 transition-opacity duration-150 flex-shrink-0 ml-auto md:ml-0 p-1"
-                      style={{ color: "var(--muted)" }}
-                    >
-                      <svg width="14" height="14" viewBox="0 0 12 12" fill="none">
-                        <path d="M2 2L10 10M10 2L2 10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-                      </svg>
-                    </motion.button>
+                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-150 flex-shrink-0">
+                      <motion.button
+                        whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}
+                        onClick={() => openSetup(task.id)}
+                        className="p-1.5 rounded-md hover:bg-[color-mix(in_srgb,var(--foreground)_10%,transparent)]"
+                        style={{ color: "var(--accent)" }}
+                        title="Focus on task"
+                      >
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <circle cx="12" cy="12" r="10"></circle>
+                          <circle cx="12" cy="12" r="3"></circle>
+                        </svg>
+                      </motion.button>
+                      <motion.button
+                        whileHover={{ scale: 1.2 }} whileTap={{ scale: 0.8 }}
+                        onClick={() => deleteTask(task.id)}
+                        className="p-1.5 rounded-md hover:bg-[color-mix(in_srgb,var(--danger)_10%,transparent)]"
+                        style={{ color: "var(--muted)" }}
+                        title="Delete task"
+                      >
+                        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                          <path d="M2 2L10 10M10 2L2 10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                        </svg>
+                      </motion.button>
+                    </div>
                   </div>
                 </motion.div>
               );

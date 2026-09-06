@@ -87,15 +87,29 @@ Most productivity workflows suffer from excessive tool switching: tasks in one a
 
 ---
 
-### 5. 📈 Insights & Productivity Analytics
+### 5. ⏱️ Advanced Focus Engine (Timers & Ambient Audio)
+- **Modes of Focus:** Switch effortlessly between **Pomodoro**, open-ended **Deep Work**, and a precise **Stopwatch**.
+- **Ambient Soundscapes:** Enhance concentration with a curated library of built-in ambient sounds (e.g., Long Rain, Forest Ambiance, Ocean Waves, Fire) featuring a retro pixel visualizer.
+- **Mini Player:** Seamlessly detach the timer into a floating, picture-in-picture mini player, keeping you focused while navigating other parts of Dailys.
+- **Persistent State:** Timer and audio states persist seamlessly across navigation using the central Focus Context.
+
+---
+
+### 6. 👤 Profile & Configuration Management
+- **Avatar Cropping UI:** Upload custom profile images with an integrated `react-easy-crop` interface, providing intuitive drag-to-position and smooth slider zooming.
+- **Data Overview:** Quick telemetry on total notes created, completed tasks, and current session state.
+- **Secure Architecture:** Built on robust Supabase authentication and secure cloud bucket storage.
+
+---
+
+### 7. 📈 Insights & Productivity Analytics
 - **30-Day Productivity Trends:** Visual charts detailing daily throughput and completion velocity.
 - **Category Allocation:** Real-time visibility into how focus is distributed across different life domains.
 - **Active Streaks:** Quantifiable metric history to evaluate consistency over time.
 
 ---
 
-### 6. ⏱️ Time Engine (Focus Timer & Clock Modes)
-- **Deep Work Sessions:** Integrated Pomodoro focus timer with ambient progress indicators.
+### 8. ⏱️ Time Display Engine (Clock Modes)
 - **4 Distinct Clock Displays:**
   - **Minimalist:** Ultra-clean typographic clock.
   - **Dot Matrix:** Nostalgic LED-grid second pulses.
@@ -104,10 +118,17 @@ Most productivity workflows suffer from excessive tool switching: tasks in one a
 
 ---
 
-### 7. 🎨 Bento Layout Studio & Custom Theme Engine
+### 9. 🎨 Bento Layout Studio & Custom Theme Engine
 - **Modular Dashboard:** Freely organize, reorder, and configure widgets according to your daily routine.
 - **Palette Customization:** Built-in curated themes (*Obsidian, Midnight, Cyberpunk, Monokai, Tokyo Night*) alongside a live theme generator using HSL tokens.
 - **Zero-Runtime Tokens:** Optimized with Tailwind CSS v4 `color-mix()` CSS variables for instant theme switching.
+
+---
+
+### 10. 🌍 Public Documentation & SEO
+- **Information Hub:** Explore dedicated pages for **FAQ**, **Help**, and **Privacy Policy**, presented cleanly without breaking focus.
+- **Social Metadata Prepared:** Production-ready Open Graph and Twitter card tags embedded directly into the generated HTML.
+- **Branded Social Previews:** Beautiful custom-generated social sharing banners ensuring your links look premium across platforms.
 
 ---
 

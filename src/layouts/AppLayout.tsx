@@ -2,6 +2,9 @@ import { Outlet, NavLink, useNavigate, useLocation } from "react-router";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useApp } from "../context/AppContext";
+import { FocusSetupModal } from "../components/focus/FocusSetupModal";
+import { FocusView } from "../components/focus/FocusView";
+import { FocusMiniPlayer } from "../components/focus/FocusMiniPlayer";
 import { useEffect, useRef } from "react";
 import { ErrorBoundary } from "../ErrorBoundary";
 import { SidebarClock } from "../components/SidebarClock";
@@ -382,6 +385,10 @@ export default function AppLayout() {
           </motion.main>
         </AnimatePresence>
       </div>
+
+      <FocusSetupModal />
+      <FocusView />
+      <FocusMiniPlayer />
     </div>
   );
 }

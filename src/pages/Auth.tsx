@@ -74,127 +74,7 @@ export default function Auth() {
   const cooldownRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   // Three.js background
-
-  useEffect(() => {
-    let active = true
-
-    let renderer: any
-
-    let geometry: any
-
-    let material: any
-
-    let scene: any
-
-    let camera: any
-
-    let animationId: number
-
-    const initThree = (THREE: any) => {
-      if (!canvasRef.current || !active) return
-
-      scene = new THREE.Scene()
-
-      camera = new THREE.PerspectiveCamera(
-        75,
-        window.innerWidth / window.innerHeight,
-        0.1,
-        1000,
-      )
-
-      renderer = new THREE.WebGLRenderer({
-        canvas: canvasRef.current,
-        alpha: true,
-        antialias: true,
-      })
-
-      renderer.setPixelRatio(window.devicePixelRatio)
-
-      renderer.setSize(window.innerWidth, window.innerHeight)
-
-      geometry = new THREE.BufferGeometry()
-
-      const count = 3000
-
-      const positions = new Float32Array(count * 3)
-
-      for (let i = 0; i < count * 3; i++) {
-        positions[i] = (Math.random() - 0.5) * 10
-      }
-
-      geometry.setAttribute("position", new THREE.BufferAttribute(positions, 3))
-
-      material = new THREE.PointsMaterial({
-        size: 0.02,
-        color: 0x888888,
-        transparent: true,
-        opacity: 0.8,
-      })
-
-      const points = new THREE.Points(geometry, material)
-
-      scene.add(points)
-
-      camera.position.z = 5
-
-      const animate = () => {
-        if (!active) return
-
-        animationId = requestAnimationFrame(animate)
-
-        points.rotation.x += 0.0005
-
-        points.rotation.y += 0.001
-
-        renderer.render(scene, camera)
-      }
-
-      animate()
-
-      const handleResize = () => {
-        if (!camera || !renderer) return
-
-        camera.aspect = window.innerWidth / window.innerHeight
-
-        camera.updateProjectionMatrix()
-
-        renderer.setSize(window.innerWidth, window.innerHeight)
-      }
-
-      window.addEventListener("resize", handleResize)
-
-      return () => window.removeEventListener("resize", handleResize)
-    }
-
-    if ((window as any).THREE) {
-      initThree((window as any).THREE)
-    } else {
-      const script = document.createElement("script")
-
-      script.src =
-        "https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"
-
-      script.onload = () => {
-        if ((window as any).THREE) {
-          initThree((window as any).THREE)
-        }
-      }
-
-      document.head.appendChild(script)
-    }
-
-    return () => {
-      active = false
-
-      if (animationId) cancelAnimationFrame(animationId)
-
-      if (renderer) renderer.dispose()
-
-      if (geometry) geometry.dispose()
-
-      if (material) material.dispose()
-    }
-  }, [])
+  // Removed THREE.js background effect
 
   useEffect(() => {
     if (!needsVerification) return
@@ -436,16 +316,18 @@ export default function Auth() {
 
   return (
     <div className="min-h-screen w-full flex flex-col lg:flex-row bg-black relative">
-      {/* Full-screen WebGL Background */}
-      <div className="fixed inset-0 z-0 pointer-events-none">
-        <canvas ref={canvasRef} className="w-full h-full block" />
-        <div
-          className="absolute inset-0"
-          style={{
-            background:
-              "radial-gradient(circle at center, color-mix(in srgb, var(--background) 75%, transparent) 0%, rgba(0,0,0,0) 100%)",
-          }}
+      
+      {/* Animated Video Background */}
+      <div className="fixed inset-0 z-0 pointer-events-none lg:w-[calc(100%-480px)] xl:w-[calc(100%-520px)]">
+        <video 
+          src="/aspen-lake-pixel-moewalls-com.mp4" 
+          autoPlay 
+          loop 
+          muted 
+          playsInline 
+          className="absolute inset-0 w-full h-full object-cover" 
         />
+        <div className="absolute inset-0" style={{ background: "radial-gradient(circle at center, rgba(0,0,0,0) 0%, rgba(0,0,0,0.4) 100%)" }} />
       </div>
 
       {/* Left Side - Visual/Copy */}
