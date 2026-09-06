@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { LayoutRenderer } from "../components/layout/LayoutRenderer";
-import { LayoutSpec } from "../lib/design/LayoutSpec";
+import { LayoutSpec, LayoutNode } from "../lib/design/LayoutSpec";
 import { useApp } from "../context/AppContext";
 
 const DEFAULT_HOME_LAYOUT: LayoutSpec = {
@@ -32,6 +32,7 @@ const DEFAULT_HOME_LAYOUT: LayoutSpec = {
             direction: "col",
             gap: "md",
             children: [
+              { type: "widget", widgetId: "focus" },
               { type: "widget", widgetId: "recent_notes" },
               { type: "widget", widgetId: "category_breakdown" }
             ]
@@ -42,15 +43,53 @@ const DEFAULT_HOME_LAYOUT: LayoutSpec = {
   }
 };
 
+const hasWidget = (node: LayoutNode, widgetId: string): boolean => {
+  if (node.type === "widget") return node.widgetId === widgetId;
+  if ("children" in node && Array.isArray(node.children)) {
+    return node.children.some(child => hasWidget(child, widgetId));
+  }
+  return false;
+};
+
 export default function Home() {
   const { layouts } = useApp();
   
   const currentLayout = useMemo(() => {
     const customLayout = layouts.find(l => l.surface === "home");
+    let layout = DEFAULT_HOME_LAYOUT;
+    
     if (customLayout && customLayout.layout_spec && customLayout.layout_spec.root) {
-      return customLayout.layout_spec;
+      layout = customLayout.layout_spec;
     }
-    return DEFAULT_HOME_LAYOUT;
+    
+    // Compatibility: If layout doesn't have the focus widget, gracefully inject it.
+    // We only do this if it's completely missing, ensuring we don't break user intent if they moved it.
+    if (!hasWidget(layout.root, "focus")) {
+      const newLayout = JSON.parse(JSON.stringify(layout));
+      let injected = false;
+      
+      // Attempt to inject at the top of the right column if it's a standard grid
+      if (newLayout.root.type === "stack" && Array.isArray(newLayout.root.children)) {
+        const grid = newLayout.root.children.find((c: any) => c.type === "grid");
+        if (grid && Array.isArray(grid.children) && grid.children.length > 1) {
+          const rightCol = grid.children[1];
+          if (rightCol.type === "stack" && Array.isArray(rightCol.children)) {
+            rightCol.children.unshift({ type: "widget", widgetId: "focus" });
+            injected = true;
+          }
+        }
+        
+        // Fallback: just put it below upcoming tasks
+        if (!injected && newLayout.root.children.length > 1) {
+          newLayout.root.children.splice(2, 0, { type: "widget", widgetId: "focus" });
+        } else if (!injected) {
+          newLayout.root.children.push({ type: "widget", widgetId: "focus" });
+        }
+      }
+      return newLayout;
+    }
+
+    return layout;
   }, [layouts]);
 
   return (
