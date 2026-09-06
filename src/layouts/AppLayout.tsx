@@ -175,12 +175,13 @@ export default function AppLayout() {
       >
         {/* Logo */}
         <div className="flex items-center gap-3 px-4 py-5 flex-shrink-0" style={{ borderBottom: "1px solid var(--card-border)" }}>
-          <motion.div
-            whileHover={{ scale: 1.06 }} whileTap={{ scale: 0.94 }}
-            className="w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0 cursor-pointer overflow-hidden -ml-1"
+          <motion.div 
+            whileHover={{ scale: 1.05 }} 
+            whileTap={{ scale: 0.95 }}
+            className="h-10 rounded-lg flex items-center justify-center flex-shrink-0 cursor-pointer -ml-1"
             onClick={() => navigate("/dashboard")}
           >
-            <img src="/dailyss-logo.png" alt="Dailys" className="w-full h-full object-cover scale-[2.4]" />
+            <img src="/dailyss-logo.png" alt="Dailys" className="h-full w-auto object-contain" />
           </motion.div>
 
           <AnimatePresence initial={false}>
