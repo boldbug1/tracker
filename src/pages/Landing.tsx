@@ -303,7 +303,7 @@ export default function Landing() {
       >
         <div className="flex items-center gap-3">
           <div className="w-12 h-12 rounded-lg overflow-hidden flex items-center justify-center">
-            <img src="/DailysLogo.png" alt="Dailys" className="w-full h-full object-cover scale-[2.2]" />
+            <img src="/dailyss-logo.png" alt="Dailys" className="w-full h-full object-cover scale-[2.2]" />
           </div>
         </div>
 
@@ -629,7 +629,7 @@ export default function Landing() {
             >
               <div className="flex items-center gap-3 px-2 py-2 mb-2">
                 <div className="w-8 h-8 rounded overflow-hidden flex items-center justify-center">
-                  <img src="/DailysLogo.png" alt="Dailys" className="w-full h-full object-cover scale-[2.2]" />
+                  <img src="/dailyss-logo.png" alt="Dailys" className="w-full h-full object-cover scale-[2.2]" />
                 </div>
               </div>
               {["Home", "Tasks", "Notes", "Analytics"].map((item, i) => (
@@ -719,7 +719,7 @@ export default function Landing() {
       >
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded overflow-hidden flex items-center justify-center">
-            <img src="/DailysLogo.png" alt="Dailys" className="w-full h-full object-cover scale-[2.2]" />
+            <img src="/dailyss-logo.png" alt="Dailys" className="w-full h-full object-cover scale-[2.2]" />
           </div>
         </div>
         <p className="font-mono-data text-xs" style={{ color: "var(--muted)" }}>

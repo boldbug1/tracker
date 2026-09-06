@@ -180,7 +180,7 @@ export default function AppLayout() {
             className="w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0 cursor-pointer overflow-hidden -ml-1"
             onClick={() => navigate("/dashboard")}
           >
-            <img src="/DailysLogo.png" alt="Dailys" className="w-full h-full object-cover scale-[2.4]" />
+            <img src="/dailyss-logo.png" alt="Dailys" className="w-full h-full object-cover scale-[2.4]" />
           </motion.div>
 
           <AnimatePresence initial={false}>
