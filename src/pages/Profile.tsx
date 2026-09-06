@@ -87,7 +87,7 @@ export default function Profile() {
             className="text-sm px-4 py-2 rounded-lg transition-all"
             style={{ color: "var(--muted)", border: "1px solid var(--card-border)", background: "var(--card)" }}
           >
-            â† Back
+            &larr; Back
           </motion.button>
         </motion.div>
 
