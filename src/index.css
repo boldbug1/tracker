@@ -4,6 +4,20 @@
 @import url('https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400..700&display=swap');
 @import 'tailwindcss';
 
+@font-face {
+  font-family: 'Cream';
+  src: url('/fonts/cream/cream-DEMO.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Sugo Pro Display';
+  src: url('/fonts/sugo/Sugo-Pro-Display-Regular-trial.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
 html,
 body,
 #root {

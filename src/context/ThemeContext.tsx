@@ -21,6 +21,9 @@ const AVAILABLE_FONTS = [
   { id: 'inter', name: 'Inter (Sans)', value: 'Inter, sans-serif' },
   { id: 'instrument', name: 'Instrument (Serif)', value: 'Instrument Serif, serif' },
   { id: 'jetbrains', name: 'JetBrains (Mono)', value: 'JetBrains Mono, monospace' },
+  { id: 'pixelify', name: 'Pixelify Sans', value: '"Pixelify Sans", sans-serif' },
+  { id: 'cream', name: 'Cream', value: 'Cream, sans-serif' },
+  { id: 'sugo', name: 'Sugo Pro Display', value: '"Sugo Pro Display", sans-serif' },
   { id: 'system', name: 'System', value: 'system-ui, -apple-system, sans-serif' }
 ];
 
