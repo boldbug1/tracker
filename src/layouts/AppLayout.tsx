@@ -184,18 +184,7 @@ export default function AppLayout() {
             <img src="/dailyss-logo.png" alt="Dailys" className="h-full w-auto object-contain" />
           </motion.div>
 
-          <AnimatePresence initial={false}>
-            {!collapsed && (
-              <motion.span
-                initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -10 }}
-                transition={{ duration: 0.18 }}
-                className="font-display text-3xl tracking-wide flex-1 whitespace-nowrap overflow-hidden"
-                style={{ color: "var(--foreground)", paddingTop: "4px" }}
-              >
-                Dailys
-              </motion.span>
-            )}
-          </AnimatePresence>
+
 
           <motion.button
             whileHover={{ scale: 1.15 }} whileTap={{ scale: 0.85 }}

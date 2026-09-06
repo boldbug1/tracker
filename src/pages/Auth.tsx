@@ -243,11 +243,10 @@ export default function Auth() {
             <Link to="/" className="flex items-center gap-3" style={{ textDecoration: "none" }}>
               <motion.div
                 whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
-                className="w-12 h-12 rounded-lg flex items-center justify-center overflow-hidden bg-black border border-[#222]"
+                className="h-12 rounded-lg flex items-center justify-center"
               >
-                <img src="/dailyss-logo.png" alt="Dailys" className="w-full h-full object-cover" />
+                <img src="/dailyss-logo.png" alt="Dailys" className="h-full w-auto object-contain" />
               </motion.div>
-              <span className="font-display text-3xl" style={{ color: "var(--foreground)", paddingTop: "4px" }}>Dailys</span>
             </Link>
           </motion.div>
 
