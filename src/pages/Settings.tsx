@@ -5,6 +5,7 @@ import { useClock } from "../context/ClockContext";
 import { CustomThemeEditor } from "../components/CustomThemeEditor";
 import { CustomTheme } from "../lib/theme/types";
 import { supabase } from "../lib/supabase";
+import { ThemedSelect } from "../components/ui/ThemedSelect";
 
 export default function Settings() {
   const { theme, setThemeId, availableThemes, customThemes, fetchCustomThemes, activeFontId, setFontId, availableFonts } = useTheme();
@@ -76,35 +77,21 @@ export default function Settings() {
                 <p className="text-xs" style={{ color: "var(--muted)" }}>Select a built-in or custom theme.</p>
               </div>
               
-              <div className="relative group">
-                <select 
+              <div className="relative group flex items-center justify-end">
+                <ThemedSelect
                   value={theme.id}
-                  onChange={(e) => setThemeId(e.target.value)}
-                  className="appearance-none bg-transparent py-2 pl-4 pr-10 rounded-lg text-sm font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus)] hover:bg-[color-mix(in_srgb,var(--foreground)_5%,transparent)] transition-all border active:scale-95 cursor-pointer"
-                  style={{ 
-                    color: "var(--foreground)", 
-                    borderColor: "var(--border)", 
-                    background: "var(--surface-elevated)"
-                  }}
-                >
-                  <optgroup label="Built-in" style={{ background: "var(--surface)" }}>
-                    {availableThemes.map(t => (
-                      <option key={t.id} value={t.id}>{t.name}</option>
-                    ))}
-                  </optgroup>
-                  {customThemes.length > 0 && (
-                    <optgroup label="Custom" style={{ background: "var(--surface)" }}>
-                      {customThemes.map(t => (
-                         <option key={t.id} value={t.id}>{t.name}</option>
-                      ))}
-                    </optgroup>
-                  )}
-                </select>
-                <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none opacity-50 group-hover:opacity-100 transition-opacity">
-                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                    <path d="M3 5L6 8L9 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                </div>
+                  onChange={setThemeId}
+                  groups={[
+                    {
+                      label: "Built-in",
+                      options: availableThemes.map(t => ({ value: t.id, label: t.name }))
+                    },
+                    ...(customThemes.length > 0 ? [{
+                      label: "Custom",
+                      options: customThemes.map(t => ({ value: t.id, label: t.name }))
+                    }] : [])
+                  ]}
+                />
               </div>
             </div>
 
@@ -115,26 +102,16 @@ export default function Settings() {
                 <p className="text-xs" style={{ color: "var(--muted)" }}>Select the primary font for the application.</p>
               </div>
               
-              <div className="relative group">
-                <select 
+              <div className="relative group flex items-center justify-end">
+                <ThemedSelect
                   value={activeFontId}
-                  onChange={(e) => setFontId(e.target.value)}
-                  className="appearance-none bg-transparent py-2 pl-4 pr-10 rounded-lg text-sm font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus)] hover:bg-[color-mix(in_srgb,var(--foreground)_5%,transparent)] transition-all border active:scale-95 cursor-pointer"
-                  style={{ 
-                    color: "var(--foreground)", 
-                    borderColor: "var(--border)", 
-                    background: "var(--surface-elevated)"
-                  }}
-                >
-                  {availableFonts.map(f => (
-                    <option key={f.id} value={f.id}>{f.name}</option>
-                  ))}
-                </select>
-                <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none opacity-50 group-hover:opacity-100 transition-opacity">
-                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                    <path d="M3 5L6 8L9 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                </div>
+                  onChange={setFontId}
+                  groups={[
+                    {
+                      options: availableFonts.map(f => ({ value: f.id, label: f.name }))
+                    }
+                  ]}
+                />
               </div>
             </div>
 
@@ -145,26 +122,16 @@ export default function Settings() {
                 <p className="text-xs" style={{ color: "var(--muted)" }}>Choose how the time is displayed.</p>
               </div>
               
-              <div className="relative group">
-                <select 
+              <div className="relative group flex items-center justify-end">
+                <ThemedSelect
                   value={activeClock.id}
-                  onChange={(e) => setClockId(e.target.value)}
-                  className="appearance-none bg-transparent py-2 pl-4 pr-10 rounded-lg text-sm font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus)] hover:bg-[color-mix(in_srgb,var(--foreground)_5%,transparent)] transition-all border active:scale-95 cursor-pointer"
-                  style={{ 
-                    color: "var(--foreground)", 
-                    borderColor: "var(--border)", 
-                    background: "var(--surface-elevated)"
-                  }}
-                >
-                  {availableClocks.map(c => (
-                    <option key={c.id} value={c.id}>{c.name}</option>
-                  ))}
-                </select>
-                <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none opacity-50 group-hover:opacity-100 transition-opacity">
-                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                    <path d="M3 5L6 8L9 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                </div>
+                  onChange={setClockId}
+                  groups={[
+                    {
+                      options: availableClocks.map(c => ({ value: c.id, label: c.name }))
+                    }
+                  ]}
+                />
               </div>
             </div>
 
