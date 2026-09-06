@@ -1,8 +1,9 @@
 import { useMemo } from "react";
 import { Link } from "react-router";
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useApp } from "../../context/AppContext";
+import { useFocus } from "../../context/FocusContext";
 import { getMiniChartData, computeStreak } from "../../lib/analytics";
 
 const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -209,20 +210,91 @@ export function UpcomingTasksWidget() {
 }
 
 export function FocusWidget() {
+  const { session, elapsedSeconds, remainingSeconds, openSetup, openOverlay, pauseSession } = useFocus();
   const { tasks } = useApp();
-  const high = tasks.filter((t) => t.priority === "high" && !t.completed).length;
+
+  const isIdle = session.status === "idle" || session.status === "setup";
+  const task = session.taskId ? tasks.find(t => t.id === session.taskId) : null;
+  const displayTime = session.mode === "stopwatch" ? elapsedSeconds : remainingSeconds;
+
+  const formatTime = (sec: number) => {
+    const m = Math.floor(sec / 60);
+    const s = sec % 60;
+    return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+  };
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.22, duration: 0.3 }}
-      className="p-5 rounded-xl w-full"
-      style={{ background: "var(--accent-dim)", border: "1px solid rgba(212,168,83,0.2)" }}
+      className="p-5 rounded-xl w-full flex flex-col justify-between"
+      style={{ background: "var(--accent-dim)", border: "1px solid rgba(212,168,83,0.2)", minHeight: "160px" }}
     >
-      <p className="font-mono-data text-xs tracking-widest uppercase mb-3" style={{ color: "var(--accent)" }}>Today's Focus</p>
-      <p className="font-display text-lg leading-snug mb-1" style={{ color: "var(--foreground)" }}>
-        {tasks.filter((t) => t.priority === "high" && !t.completed)[0]?.text ?? "No high priority tasks remaining."}
-      </p>
-      <p className="text-xs" style={{ color: "var(--muted)" }}>{high} high-priority item{high !== 1 ? "s" : ""} open</p>
+      {isIdle ? (
+        <>
+          <div>
+            <p className="font-mono-data text-xs tracking-widest uppercase mb-3" style={{ color: "var(--accent)" }}>Focus Mode</p>
+            <p className="font-display text-lg leading-snug mb-1" style={{ color: "var(--foreground)" }}>
+              Stay focused on one thing at a time.
+            </p>
+          </div>
+          <div className="mt-4">
+            <button
+              onClick={() => openSetup()}
+              className="px-4 py-2 rounded-lg text-sm font-medium bg-[var(--accent)] text-white hover:opacity-90 active:scale-95 transition-all shadow-sm inline-block"
+            >
+              Start Focus
+            </button>
+          </div>
+        </>
+      ) : (
+        <>
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <p className="font-mono-data text-xs tracking-widest uppercase" style={{ color: "var(--accent)" }}>Focus Session</p>
+              <div className="flex items-center gap-1.5 text-xs font-medium" style={{ color: session.status === "active" ? "var(--green)" : "var(--muted)" }}>
+                <div className={`w-1.5 h-1.5 rounded-full ${session.status === "active" ? "bg-[var(--green)] animate-pulse" : "bg-[var(--muted)]"}`} />
+                {session.status === "active" ? "Active" : "Paused"}
+              </div>
+            </div>
+            
+            <p className="font-display text-lg leading-snug truncate" style={{ color: "var(--foreground)" }}>
+              {session.objective || (task ? task.text : "Deep Work")}
+            </p>
+            <p className="text-xs mt-1" style={{ color: "var(--muted)" }}>
+              {session.mode === "pomodoro" ? "Pomodoro" : session.mode === "deep_work" ? "Deep Work" : "Stopwatch"}
+              {session.mode !== "stopwatch" && ` · ${session.targetDuration / 60} min`}
+            </p>
+          </div>
+          
+          <div className="mt-4 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              {session.mode !== "stopwatch" && (
+                <svg width="24" height="24" viewBox="0 0 24 24" className="-rotate-90">
+                  <circle cx="12" cy="12" r="10" fill="none" stroke="var(--card-border)" strokeWidth="2" />
+                  <circle
+                    cx="12" cy="12" r="10" fill="none" stroke="var(--accent)" strokeWidth="2"
+                    strokeDasharray={2 * Math.PI * 10}
+                    strokeDashoffset={2 * Math.PI * 10 * (1 - (session.targetDuration > 0 ? elapsedSeconds / session.targetDuration : 0))}
+                    strokeLinecap="round" className="transition-all duration-1000 ease-linear"
+                  />
+                </svg>
+              )}
+              <span className="font-display text-xl tabular-nums tracking-tight" style={{ color: "var(--foreground)" }}>
+                {formatTime(displayTime)}
+              </span>
+            </div>
+            
+            <div className="flex gap-2">
+              <button
+                onClick={session.status === "active" ? pauseSession : openOverlay}
+                className="px-3 py-1.5 rounded-md bg-[color-mix(in_srgb,var(--foreground)_5%,transparent)] hover:bg-[color-mix(in_srgb,var(--foreground)_10%,transparent)] text-xs font-medium text-[var(--foreground)] transition-colors"
+              >
+                {session.status === "active" ? "Pause" : "Open"}
+              </button>
+            </div>
+          </div>
+        </>
+      )}
     </motion.div>
   );
 }

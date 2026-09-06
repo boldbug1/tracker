@@ -4,6 +4,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useApp } from "../context/AppContext";
 import BackgroundPixelStars from "../components/BackgroundPixelStars";
 import DotMatrixText from "../components/DotMatrixText";
+import MouseFollowStroke from "../components/MouseFollowStroke";
+import Footer from "../components/Footer";
 
 // -- Bento mini-components --------------------------------------------------
 
@@ -343,6 +345,9 @@ export default function Landing() {
           }}
         />
 
+        {/* Organic Interactive Mouse Stroke */}
+        <MouseFollowStroke />
+
         {/* Subtle white radial glow */}
         <div
           className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] rounded-full pointer-events-none"
@@ -680,7 +685,6 @@ export default function Landing() {
       {/* CTA */}
       <section
         className="px-8 py-24 text-center"
-        style={{ borderTop: "1px solid var(--card-border)" }}
       >
         <motion.p
           initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
@@ -713,26 +717,7 @@ export default function Landing() {
       </section>
 
       {/* Footer */}
-      <footer
-        className="px-8 py-8 flex items-center justify-between"
-        style={{ borderTop: "1px solid var(--card-border)" }}
-      >
-        <div className="flex items-center gap-3">
-          <div className="h-10 rounded flex items-center justify-center">
-            <img src="/dailyss-logo.png" alt="Dailys" className="h-full w-auto object-contain" />
-          </div>
-        </div>
-        <p className="font-mono-data text-xs" style={{ color: "var(--muted)" }}>
-          (c) 2026 Dailys. All rights reserved.
-        </p>
-        <div className="hidden md:flex items-center gap-6">
-          {["Privacy", "Terms", "Contact"].map((item) => (
-            <a key={item} href="#" className="font-mono-data text-xs hover:opacity-80 transition-opacity" style={{ color: "var(--muted)", textDecoration: "none" }}>
-              {item}
-            </a>
-          ))}
-        </div>
-      </footer>
+      <Footer />
 
     </div>
   );

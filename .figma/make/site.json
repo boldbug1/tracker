@@ -1,10 +1,17 @@
 {
-  "description": "Effortlessly manage your daily tasks with a sleek, minimalist dashboard that enhances productivity and keeps you organized.",
+  "title": "Dailys — Your workspace, every day.",
+  "description": "A focused workspace for tasks, notes, focus sessions, and more.",
   "robots": {
-    "index": false
+    "index": true
   },
   "accessibility": {
     "addBypassLinks": false,
     "ignoreReducedMotion": false
+  },
+  "icons": {
+    "icon": "/dailyss-logo.png"
+  },
+  "openGraph": {
+    "image": "/social-preview.png"
   }
 }

@@ -1,7 +1,8 @@
-﻿import { useState, useRef } from "react";
+import { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useApp } from "../context/AppContext";
 import { useNavigate } from "react-router";
+import { CropAvatarModal } from "../components/profile/CropAvatarModal";
 
 export default function Profile() {
   const { user, updateProfile, uploadAvatar, logout, tasks, notes } = useApp();
@@ -15,6 +16,9 @@ export default function Profile() {
   const [avatarError, setAvatarError] = useState("");
   const [dragOver, setDragOver] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+
+  const [cropImageSrc, setCropImageSrc] = useState<string | null>(null);
+  const [cropFileName, setCropFileName] = useState("");
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,8 +36,23 @@ export default function Profile() {
       return;
     }
     setAvatarError("");
+    setCropFileName(file.name);
+    const reader = new FileReader();
+    reader.onload = () => {
+      setCropImageSrc(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+    // Reset file input value so selecting the same file again works
+    if (fileRef.current) {
+      fileRef.current.value = "";
+    }
+  };
+
+  const handleSaveCroppedAvatar = async (croppedFile: File) => {
+    setCropImageSrc(null);
     setAvatarUploading(true);
-    const { error } = await uploadAvatar(file);
+    setAvatarError("");
+    const { error } = await uploadAvatar(croppedFile);
     setAvatarUploading(false);
     if (error) setAvatarError(error);
   };
@@ -282,6 +301,17 @@ export default function Profile() {
         </motion.div>
 
       </div>
+      
+      <AnimatePresence>
+        {cropImageSrc && (
+          <CropAvatarModal
+            imageSrc={cropImageSrc}
+            fileName={cropFileName}
+            onClose={() => setCropImageSrc(null)}
+            onSave={handleSaveCroppedAvatar}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }

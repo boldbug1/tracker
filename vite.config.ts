@@ -81,7 +81,7 @@ function figmaSiteConfiguration(config: FigmaSiteConfiguration): Plugin {
     return html.replace(`<!-- ${slotName} -->`, content)
   }
 
-  const title = config.title ?? "Figma Make App"
+  const title = config.title ?? "Dailys"
   const description = config.description ?? ''
   const favicon = config.icons?.icon ?? ''
   const socialImage = config.openGraph?.image ?? ''
@@ -124,6 +124,13 @@ function figmaSiteConfiguration(config: FigmaSiteConfiguration): Plugin {
         result = replaceHtmlCommentSlot(result, 'figma:body-end', bodyEnd)
 
         const tags: HtmlTagDescriptor[] = []
+        tags.push({ tag: 'meta', attrs: { property: 'og:type', content: 'website' }, injectTo: 'head' })
+        tags.push({ tag: 'meta', attrs: { property: 'og:site_name', content: 'Dailys' }, injectTo: 'head' })
+        
+        // Add og:url if process.env.FIGMA_PUBLIC_URL is set (from config.base)
+        const publicUrl = process.env.FIGMA_PUBLIC_URL || 'https://dailys.com'; // fallback if not set
+        tags.push({ tag: 'meta', attrs: { property: 'og:url', content: publicUrl }, injectTo: 'head' })
+
         if (description) {
           tags.push({ tag: 'meta', attrs: { name: 'description', content: description }, injectTo: 'head' })
         }
@@ -135,9 +142,11 @@ function figmaSiteConfiguration(config: FigmaSiteConfiguration): Plugin {
         }
         if (title) {
           tags.push({ tag: 'meta', attrs: { property: 'og:title', content: title }, injectTo: 'head' })
+          tags.push({ tag: 'meta', attrs: { name: 'twitter:title', content: title }, injectTo: 'head' })
         }
         if (description) {
           tags.push({ tag: 'meta', attrs: { property: 'og:description', content: description }, injectTo: 'head' })
+          tags.push({ tag: 'meta', attrs: { name: 'twitter:description', content: description }, injectTo: 'head' })
         }
         if (socialImage) {
           tags.push(
